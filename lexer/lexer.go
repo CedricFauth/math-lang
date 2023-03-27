@@ -25,13 +25,21 @@ type Token struct {
 	value     any
 }
 
-func (t Token) String() string {
+func NewTestToken(t TokenType) *Token {
+	return &Token{t, t.String(), nil}
+}
+
+func (t *Token) String() string {
 	switch t.value.(type) {
 	case float64:
 		return fmt.Sprintf("Token(%v, '%v', %.2f)", t.tokenType, t.lexeme, t.value)
 	default:
 		return fmt.Sprintf("Token(%v, '%v', %v)", t.tokenType, t.lexeme, t.value)
 	}
+}
+
+func (t *Token) Lexeme() string {
+	return t.lexeme
 }
 
 type Lexer struct {

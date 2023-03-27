@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/CedricFauth/math-lang-go/lexer"
+	"github.com/CedricFauth/math-lang-go/parser"
 )
 
 func failed(what ...any) {
@@ -13,12 +13,16 @@ func failed(what ...any) {
 }
 
 func main() {
-	input := ".12+-"
-	lexer := lexer.New(input)
+	/*
+		input := ".12+-"
+		lexer := lexer.New(input)
 
-	err := lexer.Scan()
-	if err != nil {
-		failed(err)
-	}
-	fmt.Printf("%v\n", lexer.Tokens())
+		err := lexer.Scan()
+		if err != nil {
+			failed(err)
+		}
+		fmt.Printf("%v\n", lexer.Tokens())
+	*/
+	parser.TestASTPrinter1()
+	parser.TestASTPrinter2()
 }
