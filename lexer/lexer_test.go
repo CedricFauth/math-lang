@@ -51,9 +51,9 @@ func TestScanOperators(t *testing.T) {
 func TestScanNumbers(t *testing.T) {
 
 	testCases := map[string]([]*Token){
-		"0":    {&Token{NUMBER, "0", 0}},
+		"0":    {&Token{NUMBER, "0", 0.0}},
 		"0.0":  {&Token{NUMBER, "0.0", 0.0}},
-		"123":  {&Token{NUMBER, "123", 123}},
+		"123":  {&Token{NUMBER, "123", 123.0}},
 		"38.":  {&Token{NUMBER, "38.", 38.0}},
 		".13":  {&Token{NUMBER, ".13", 0.13}},
 		"9.87": {&Token{NUMBER, "9.87", 9.87}},
@@ -74,22 +74,22 @@ func TestScanFull(t *testing.T) {
 
 	testCases := map[string]([]*Token){
 		"12+3": {
-			&Token{NUMBER, "12", 12},
+			&Token{NUMBER, "12", 12.0},
 			&Token{PLUS, "+", nil},
-			&Token{NUMBER, "3", 3},
+			&Token{NUMBER, "3", 3.0},
 		},
 		"33.33*3+0.1": {
 			&Token{NUMBER, "33.33", 33.33},
 			&Token{STAR, "*", nil},
-			&Token{NUMBER, "3", 3},
+			&Token{NUMBER, "3", 3.0},
 			&Token{PLUS, "+", nil},
 			&Token{NUMBER, "0.1", 0.1},
 		},
 		"1+ ( 2 * 3.0 ) -(-2.5/5)": {
-			&Token{NUMBER, "1", 1},
+			&Token{NUMBER, "1", 1.0},
 			&Token{PLUS, "+", nil},
 			&Token{PAREN_OPEN, "(", nil},
-			&Token{NUMBER, "2", 2},
+			&Token{NUMBER, "2", 2.0},
 			&Token{STAR, "*", nil},
 			&Token{NUMBER, "3.0", 3.0},
 			&Token{PAREN_CLOSE, ")", nil},
@@ -98,7 +98,7 @@ func TestScanFull(t *testing.T) {
 			&Token{MINUS, "-", nil},
 			&Token{NUMBER, "2.5", 2.5},
 			&Token{SLASH, "/", nil},
-			&Token{NUMBER, "5", 5},
+			&Token{NUMBER, "5", 5.0},
 			&Token{PAREN_CLOSE, ")", nil},
 		},
 	}

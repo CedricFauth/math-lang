@@ -3,6 +3,8 @@ package parser
 import (
 	"fmt"
 	"strings"
+
+	"github.com/CedricFauth/math-lang-go/ast"
 )
 
 type ASTPrinter struct {
@@ -23,13 +25,29 @@ func (p *ASTPrinter) dedent() int {
 func (p *ASTPrinter) pad() string {
 	return strings.Repeat("    ", p.padding)
 }
-func (p *ASTPrinter) visitLiteral(expr *Literal) string {
-	return fmt.Sprintf("%v%T(%v)", p.pad(), expr.value, expr.value)
+
+func (p *ASTPrinter) VisitVariable(expr *ast.Variable) string {
+	return fmt.Sprintf("%vVAR('%v')", p.pad(), expr.Name)
 }
 
-func (p *ASTPrinter) visitGrouping(expr *Grouping) string {
+func (p *ASTPrinter) VisitAssignment(expr *ast.Assignment) string {
 	p.indent()
-	val, err := accept[string](expr.expression, p)
+	pad := p.pad()
+	val, err := ast.Accept[string](expr.Value, p)
+	if err != nil {
+		return err.Error()
+	}
+	p.dedent()
+	return fmt.Sprintf("%vASSIGN(\n%v'%v'\n%v\n%v)", p.pad(), pad, expr.Name, val, p.pad())
+}
+
+func (p *ASTPrinter) VisitLiteral(expr *ast.Literal) string {
+	return fmt.Sprintf("%v%T(%v)", p.pad(), expr.Value, expr.Value)
+}
+
+func (p *ASTPrinter) VisitGrouping(expr *ast.Grouping) string {
+	p.indent()
+	val, err := ast.Accept[string](expr.Expression, p)
 	if err != nil {
 		return err.Error()
 	}
@@ -37,34 +55,34 @@ func (p *ASTPrinter) visitGrouping(expr *Grouping) string {
 	return fmt.Sprintf("%vGROUP(\n%v\n%v)", p.pad(), val, p.pad())
 }
 
-func (p *ASTPrinter) visitUnary(expr *Unary) string {
+func (p *ASTPrinter) VisitUnary(expr *ast.Unary) string {
 	p.indent()
 	pad := p.pad()
-	val, err := accept[string](expr.expression, p)
+	val, err := ast.Accept[string](expr.Expression, p)
 	if err != nil {
 		return err.Error()
 	}
 	p.dedent()
-	return fmt.Sprintf("%vUNARY(\n%v%v\n%v\n%v)", p.pad(), pad, expr.operator.Lexeme(), val, p.pad())
+	return fmt.Sprintf("%vUNARY(\n%v%v\n%v\n%v)", p.pad(), pad, expr.Operator.Lexeme(), val, p.pad())
 }
 
-func (p *ASTPrinter) visitBinary(expr *Binary) string {
+func (p *ASTPrinter) VisitBinary(expr *ast.Binary) string {
 	p.indent()
 	pad := p.pad()
-	valLeft, err := accept[string](expr.left, p)
+	valLeft, err := ast.Accept[string](expr.Left, p)
 	if err != nil {
 		return err.Error()
 	}
-	valRight, err := accept[string](expr.right, p)
+	valRight, err := ast.Accept[string](expr.Right, p)
 	if err != nil {
 		return err.Error()
 	}
 	p.dedent()
 
-	return fmt.Sprintf("%vBINARY(\n%v%v\n%v\n%v\n%v)", p.pad(), pad, expr.operator.Lexeme(), valLeft, valRight, p.pad())
+	return fmt.Sprintf("%vBINARY(\n%v%v\n%v\n%v\n%v)", p.pad(), pad, expr.Operator.Lexeme(), valLeft, valRight, p.pad())
 
 }
 
-func NewASTPrinter() Visitor[string] {
+func NewASTPrinter() ast.Visitor[string] {
 	return &ASTPrinter{}
 }

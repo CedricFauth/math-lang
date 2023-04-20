@@ -3,26 +3,27 @@ package parser
 import (
 	"fmt"
 
+	"github.com/CedricFauth/math-lang-go/ast"
 	"github.com/CedricFauth/math-lang-go/lexer"
 )
 
 func TestASTPrinter1() {
-	expr := &Binary{
-		&Unary{
+	expr := &ast.Binary{
+		&ast.Unary{
 			lexer.NewTestToken(lexer.MINUS),
-			&Grouping{
-				&Binary{
-					&Literal{0.33},
+			&ast.Grouping{
+				&ast.Binary{
+					&ast.Literal{0.33},
 					lexer.NewTestToken(lexer.PLUS),
-					&Literal{0.67},
+					&ast.Literal{0.67},
 				},
 			},
 		},
 		lexer.NewTestToken(lexer.STAR),
-		&Literal{42},
+		&ast.Literal{42},
 	}
 	printer := NewASTPrinter()
-	str, err := accept(expr, printer)
+	str, err := ast.Accept(expr, printer)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -30,16 +31,16 @@ func TestASTPrinter1() {
 }
 
 func TestASTPrinter2() {
-	expr := &Binary{
-		&Unary{
+	expr := &ast.Binary{
+		&ast.Unary{
 			lexer.NewTestToken(lexer.MINUS),
-			&Literal{9.99},
+			&ast.Literal{9.99},
 		},
 		lexer.NewTestToken(lexer.STAR),
-		&Literal{42},
+		&ast.Literal{42},
 	}
 	printer := NewASTPrinter()
-	str, err := accept(expr, printer)
+	str, err := ast.Accept(expr, printer)
 	if err != nil {
 		fmt.Println(err)
 	}

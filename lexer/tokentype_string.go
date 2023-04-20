@@ -15,12 +15,22 @@ func _() {
 	_ = x[PAREN_OPEN-4]
 	_ = x[PAREN_CLOSE-5]
 	_ = x[NUMBER-6]
-	_ = x[EOL-7]
+	_ = x[IDENTIFIER-7]
+	_ = x[EQUAL-8]
+	_ = x[LESS-9]
+	_ = x[GREATER-10]
+	_ = x[BANG-11]
+	_ = x[TRUE-12]
+	_ = x[FALSE-13]
+	_ = x[BANG_EQUAL-14]
+	_ = x[EQUAL_EQUAL-15]
+	_ = x[GREATER_EQUAL-16]
+	_ = x[LESS_EQUAL-17]
 }
 
-const _TokenType_name = "PLUSMINUSSTARSLASHPAREN_OPENPAREN_CLOSENUMBEREOL"
+const _TokenType_name = "PLUSMINUSSTARSLASHPAREN_OPENPAREN_CLOSENUMBERIDENTIFIEREQUALLESSGREATERBANGTRUEFALSEBANG_EQUALEQUAL_EQUALGREATER_EQUALLESS_EQUAL"
 
-var _TokenType_index = [...]uint8{0, 4, 9, 13, 18, 28, 39, 45, 48}
+var _TokenType_index = [...]uint8{0, 4, 9, 13, 18, 28, 39, 45, 55, 60, 64, 71, 75, 79, 84, 94, 105, 118, 128}
 
 func (i TokenType) String() string {
 	if i >= TokenType(len(_TokenType_index)-1) {

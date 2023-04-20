@@ -16,8 +16,24 @@ const (
 	PAREN_OPEN
 	PAREN_CLOSE
 	NUMBER
-	EOL
+	IDENTIFIER
+	EQUAL
+	LESS
+	GREATER
+	BANG
+	TRUE
+	FALSE
+	//EOL
+	BANG_EQUAL
+	EQUAL_EQUAL
+	GREATER_EQUAL
+	LESS_EQUAL
 )
+
+var keywords = map[string]TokenType{
+	"TRUE":  TRUE,
+	"FALSE": FALSE,
+}
 
 type Token struct {
 	tokenType TokenType
@@ -32,14 +48,22 @@ func NewTestToken(t TokenType) *Token {
 func (t *Token) String() string {
 	switch t.value.(type) {
 	case float64:
-		return fmt.Sprintf("Token(%v, '%v', %.2f)", t.tokenType, t.lexeme, t.value)
+		return fmt.Sprintf("&Token(%v, '%v', %.2f)", t.tokenType, t.lexeme, t.value)
 	default:
-		return fmt.Sprintf("Token(%v, '%v', %v)", t.tokenType, t.lexeme, t.value)
+		return fmt.Sprintf("&Token(%v, '%v', %v)", t.tokenType, t.lexeme, t.value)
 	}
 }
 
 func (t *Token) Lexeme() string {
 	return t.lexeme
+}
+
+func (t *Token) Type() TokenType {
+	return t.tokenType
+}
+
+func (t *Token) Value() any {
+	return t.value
 }
 
 type Lexer struct {
@@ -62,15 +86,43 @@ func (lexer *Lexer) Scan() error {
 
 	for {
 		var tokenErr error = nil
-		char, err := lexer.peek()
+		char, err := lexer.peek(0)
 		if err != nil {
 			break
 		}
 		switch char {
-		case ' ', '\t':
+		case ' ', '\t', '\n':
 			lexer.advance()
-		case '\n':
-			tokenErr = lexer.consumeToken(EOL)
+		/*case '\n':
+		tokenErr = lexer.consumeToken(EOL)*/
+		case '=':
+			c, _ := lexer.peek(1)
+			if c == '=' {
+				tokenErr = lexer.consumeToken(EQUAL_EQUAL)
+			} else {
+				tokenErr = lexer.consumeToken(EQUAL)
+			}
+		case '!':
+			c, _ := lexer.peek(1)
+			if c == '=' {
+				tokenErr = lexer.consumeToken(BANG_EQUAL)
+			} else {
+				tokenErr = lexer.consumeToken(BANG)
+			}
+		case '<':
+			c, _ := lexer.peek(1)
+			if c == '=' {
+				tokenErr = lexer.consumeToken(LESS_EQUAL)
+			} else {
+				tokenErr = lexer.consumeToken(LESS)
+			}
+		case '>':
+			c, _ := lexer.peek(1)
+			if c == '=' {
+				tokenErr = lexer.consumeToken(GREATER_EQUAL)
+			} else {
+				tokenErr = lexer.consumeToken(GREATER)
+			}
 		case '+':
 			tokenErr = lexer.consumeToken(PLUS)
 		case '-':
@@ -86,6 +138,8 @@ func (lexer *Lexer) Scan() error {
 		default:
 			if (char >= '0' && char <= '9') || char == '.' {
 				tokenErr = lexer.consumeToken(NUMBER)
+			} else if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') {
+				tokenErr = lexer.consumeToken(IDENTIFIER)
 			} else {
 				return errors.New(fmt.Sprintln("Unknown character: '"+string(char)+"' at ", lexer.index))
 			}
@@ -101,11 +155,12 @@ func (lexer *Lexer) consumeToken(tokenType TokenType) error {
 	lexeme := ""
 	var value any = nil
 
-	if tokenType == NUMBER {
+	switch tokenType {
+	case NUMBER:
 		startIndex := lexer.index
 		length := 0
-		char, err := lexer.peek()
-		isFloat := false
+		char, err := lexer.peek(0)
+		//isFloat := false
 		for {
 			if err != nil {
 				break
@@ -114,23 +169,40 @@ func (lexer *Lexer) consumeToken(tokenType TokenType) error {
 				length++
 			} else if char == '.' {
 				length++
-				isFloat = true
+				//isFloat = true
 			} else {
 				break
 			}
 			char, err = lexer.advance()
 		}
 		lexeme = lexer.code[startIndex : startIndex+length]
-		if isFloat {
-			value, err = strconv.ParseFloat(lexeme, 64)
-		} else {
+		//if isFloat {
+		value, err = strconv.ParseFloat(lexeme, 64)
+		/*} else {
 			value, err = strconv.ParseInt(lexeme, 10, 64)
-		}
+		}*/
 		if err != nil {
 			return err
 		}
-	} else {
-		char, _ := lexer.peek()
+	case IDENTIFIER:
+		start := lexer.index
+		for {
+			char, _ := lexer.advance()
+			if !((char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z' || char >= '0' && char <= '9')) {
+				break
+			}
+		}
+		end := lexer.index
+		lexeme = lexer.code[start:end]
+		if t, ok := keywords[lexeme]; ok {
+			tokenType = t
+		}
+	case BANG_EQUAL, EQUAL_EQUAL, GREATER_EQUAL, LESS_EQUAL:
+		lexeme = lexer.code[lexer.index : lexer.index+2]
+		lexer.advance()
+		lexer.advance()
+	default:
+		char, _ := lexer.peek(0)
 		lexeme = string(char)
 		lexer.advance()
 	}
@@ -143,9 +215,9 @@ func (lexer *Lexer) consumeToken(tokenType TokenType) error {
 	return nil
 }
 
-func (lexer *Lexer) peek() (byte, error) {
-	if lexer.index < len(lexer.code) {
-		return lexer.code[lexer.index], nil
+func (lexer *Lexer) peek(offset int) (byte, error) {
+	if lexer.index+offset < len(lexer.code) && lexer.index+offset >= 0 {
+		return lexer.code[lexer.index+offset], nil
 	} else {
 		return 0, errors.New("end of input")
 	}
@@ -153,5 +225,5 @@ func (lexer *Lexer) peek() (byte, error) {
 
 func (lexer *Lexer) advance() (byte, error) {
 	lexer.index++
-	return lexer.peek()
+	return lexer.peek(0)
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/CedricFauth/math-lang-go/interpreter"
+	"github.com/CedricFauth/math-lang-go/lexer"
 	"github.com/CedricFauth/math-lang-go/parser"
 )
 
@@ -13,8 +15,13 @@ func failed(what ...any) {
 }
 
 func main() {
-	/*
-		input := ".12+-"
+
+	//inputs := []string{"abc = 1", "a=abc+1"}
+	inputs := []string{"abc TRUE FALSE == >= <= != < > = !"}
+
+	interpet := interpreter.New()
+
+	for _, input := range inputs {
 		lexer := lexer.New(input)
 
 		err := lexer.Scan()
@@ -22,7 +29,14 @@ func main() {
 			failed(err)
 		}
 		fmt.Printf("%v\n", lexer.Tokens())
-	*/
-	parser.TestASTPrinter1()
-	parser.TestASTPrinter2()
+
+		parser := parser.New(lexer.Tokens())
+		expr := parser.Parse(lexer.Tokens())
+
+		res := interpreter.Evaluate(expr, interpet)
+
+		fmt.Printf("%v (%T)\n", res, res)
+	}
+	//parser.TestASTPrinter1()
+	//parser.TestASTPrinter2()
 }

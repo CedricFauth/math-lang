@@ -4,10 +4,18 @@ written in go
 
 ## Grammar
 
-```
-expression  := term
+```python
+declaration := statement #| fun_dec
+statement   := expression
+
+expression  := equality | var_dec
+assignment  := IDENTIFIER '=' term
+
+equality       → comparison ( '!='|'==' comparison )*
+comparison     → term ( '>'|'>='|'<'|'<=' term )*
+
 term        := factor ( '+'|'-' factor)*
 factor      := unary ( '*'|'/' unary)*
 unary       := '-' unary | primary
-primary     := '(' expression ')' | number
+primary     := '(' expression ')' | NUMBER | IDENTIFIER
 ```
